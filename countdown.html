@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Countdown Timer by Johnbe</title>
+    <style>
+        body {
+            background-image: url("https://images.pexels.com/photos/15501421/pexels-photo-15501421/free-photo-of-river-waterfront-at-night.jpeg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            font-family: Calibri Light, sans-serif;
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .logo {
+            width: 600px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            font-size: 300px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            margin-right: 10px;
+        }
+
+        .btn {
+            padding: 10px;
+            width: 80px;
+            height: 80px;
+            font-size: 18px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 5px;
+        }
+
+        .btn-reset {
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .popup-image {
+            width: 300px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .popup-close {
+            font-size: 20px;
+            color: white;
+            background-color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .countdown.less-than-10 {
+            color: red;
+        }
+	.footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 12px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img class="logo" src="https://www.cebucity.gov.ph/wp-content/uploads/2021/03/header-text1.png" alt="Logo">
+        <div class="countdown"></div>
+        <div class="controls">
+            <div class="input-field">
+                <input type="number" id="hours" placeholder="Hours" min="0">
+            </div>
+            <div class="input-field">
+                <input type="number" id="minutes" placeholder="Minutes" min="0">
+            </div>
+            <div class="input-field">
+                <input type="number" id="seconds" placeholder="Seconds" min="0">
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="startTimer()">Start</button>
+            <button class="btn btn-reset" onclick="resetTimer()">Reset</button>
+            <button class="btn" onclick="startBreakTimer()">Break</button>
+            <button class="btn" onclick="startLunchTimer()">Lunch</button>
+        </div>
+        <div class="popup" id="popup">
+            <div class="popup-content">
+                <img class="popup-image" src="data:image/jpeg;base64,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" alt="Popup Image">
+                <button class="popup-close" onclick="resetTimer()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var countdownElement = document.querySelector('.countdown');
+        var popupElement = document.getElementById('popup');
+        var hoursInput = document.getElementById('hours');
+        var minutesInput = document.getElementById('minutes');
+        var secondsInput = document.getElementById('seconds');
+        var countdownInterval;
+        var totalTime;
+
+        function startTimer() {
+            var hours = parseInt(hoursInput.value) || 0;
+            var minutes = parseInt(minutesInput.value) || 0;
+            var seconds = parseInt(secondsInput.value) || 0;
+
+            totalTime = hours * 3600 + minutes * 60 + seconds;
+
+            if (totalTime > 0) {
+                countdownInterval = setInterval(updateCountdown, 1000);
+            }
+        }
+
+        function updateCountdown() {
+            var hours = Math.floor(totalTime / 3600);
+            var minutes = Math.floor((totalTime % 3600) / 60);
+            var seconds = totalTime % 60;
+
+            countdownElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes
+                .toString()
+                .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (totalTime === 0) {
+                clearInterval(countdownInterval);
+                popupElement.style.display = 'block';
+                playAlarmSound();
+            }
+
+            if (totalTime <= 10) {
+                countdownElement.classList.add('less-than-10');
+            } else {
+                countdownElement.classList.remove('less-than-10');
+            }
+
+            totalTime--;
+        }
+
+        function resetTimer() {
+            clearInterval(countdownInterval);
+            countdownElement.textContent = '';
+            hoursInput.value = '';
+            minutesInput.value = '';
+            secondsInput.value = '';
+            popupElement.style.display = 'none';
+        }
+
+        function startBreakTimer() {
+            hoursInput.value = '';
+            minutesInput.value = '13';
+            secondsInput.value = '';
+            startTimer();
+        }
+
+        function startLunchTimer() {
+            hoursInput.value = '';
+            minutesInput.value = '55';
+            secondsInput.value = '';
+            startTimer();
+        }
+
+        function playAlarmSound() {
+            var audio = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
+            audio.play();
+        }
+    </script>
+
+    <div class="footer">
+        A project by Johnbe through the use of AI. As such, credits should be given to ChatGPT for assistance in building this project.
+    </div>
+
+</body>
+</html>
